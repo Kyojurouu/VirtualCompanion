@@ -2,9 +2,12 @@ package com.example.virtualcompanion;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,6 +19,10 @@ public class QuestsActivity extends BaseActivity {
     private QuestsAdapter questsAdapter;
     private DatabaseManager db;
     private ImageView navHome, navQuests, navCustomize, settingsIcon;
+    private TextView emptyStateMessage;
+    private int moodIndex;
+
+    private static final int REQUEST_CODE_QUEST = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,16 +31,45 @@ public class QuestsActivity extends BaseActivity {
 
         db = DatabaseManager.get(this);
 
+        // Get mood index from intent or fallback to latest mood
+        moodIndex = getIntent().getIntExtra("selected_mood", -1);
+        if (moodIndex == -1) {
+            moodIndex = db.getLatestMood();
+        }
+
         initializeViews();
         setupRecyclerView();
         setupNavigation();
         updateCoinDisplay();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_QUEST) {
+            if (resultCode == QuestSessionActivity.RESULT_QUEST_COMPLETED) {
+                refreshQuestList();
+                updateCoinDisplay();
+                Toast.makeText(this, "Quest completed!", Toast.LENGTH_SHORT).show();
+            } else {
+                refreshQuestList();
+                updateCoinDisplay();
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshQuestList();
+        updateCoinDisplay();
+    }
+
     // ================= VIEW BINDING =================
     private void initializeViews() {
         questsRecyclerView = findViewById(R.id.questsRecyclerView);
-
+        emptyStateMessage = findViewById(R.id.emptyStateMessage); // Add this to your XML
         navHome = findViewById(R.id.navHome);
         navQuests = findViewById(R.id.navQuests);
         navCustomize = findViewById(R.id.navCustomize);
@@ -49,82 +85,71 @@ public class QuestsActivity extends BaseActivity {
 
         questsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        String mood = db.getLatestMoodText();
-
-        if ("happy".equals(mood)) {
-            Intent intent = new Intent(this, MoodResultActivity.class);
-            intent.putExtra("flow", "HAPPY_MOOD");
-            startActivity(intent);
-            finish();
+        // Check if Happy mood AND already completed today
+        if (moodIndex == 1 && db.hasCompletedHappyQuestsToday()) {
+            // Show empty state for Happy mood (second+ time)
+            showEmptyState("You're happy! No more tasks needed today! \n\nEnjoy your day!");
             return;
         }
 
-        List<Quest> quests = db.getQuestsForMood(db.getLatestMood());
-
+        // Get quests for current mood (including happy on first time)
+        List<Quest> quests = db.getQuestsForMood(moodIndex);
 
         if (quests.isEmpty()) {
-            Toast.makeText(this, "No quests for your mood today!", Toast.LENGTH_SHORT).show();
+            showEmptyState("No quests available for your mood today!");
             return;
         }
 
-        questsAdapter = new QuestsAdapter(
-                quests,
-                this::handleQuestMarkDone
-        );
+        // Hide empty state and show quest list
+        if (emptyStateMessage != null) {
+            emptyStateMessage.setVisibility(View.GONE);
+        }
+        questsRecyclerView.setVisibility(View.VISIBLE);
 
+        questsAdapter = new QuestsAdapter(quests);
         questsRecyclerView.setAdapter(questsAdapter);
     }
 
-    // ================= QUEST LOGIC =================
-    private void handleQuestMarkDone(Quest quest, int position) {
+    private void showEmptyState(String message) {
+        questsRecyclerView.setVisibility(View.GONE);
 
-        int currentProgress = db.getQuestProgress(quest.getId());
-
-        if (currentProgress >= 100) {
-            Toast.makeText(this, "Quest already completed!", Toast.LENGTH_SHORT).show();
-            return;
+        if (emptyStateMessage != null) {
+            emptyStateMessage.setText(message);
+            emptyStateMessage.setVisibility(View.VISIBLE);
+        } else {
+            // Fallback if TextView not in layout
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
+    }
 
-        int newProgress = Math.min(currentProgress + 100, 100);
-        db.updateQuestProgress(quest.getId(), newProgress);
-        quest.setProgress(newProgress);
-
-        if (newProgress >= 100 && !db.isQuestRewarded(quest.getId())) {
-            db.addCoins(quest.getReward());
-            db.markQuestRewarded(quest.getId());
-            Toast.makeText(
-                    this,
-                    "Quest Completed! +" + quest.getReward() + " coins",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-            // ============= MOOD SESSION ===============
-
-            String moodText = quest.getMood();
-
-            int completed = db.getCompletedQuestCountForMood(moodText);
-            int total = db.getTotalQuestCountForMood(moodText);
-
-            if (completed == total) {
-
-                Intent intent = new Intent(this, MoodActivity.class);
-                intent.putExtra("flow", "QUEST_COMPLETE");
-
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
+    private void refreshQuestList() {
+        if (db != null) {
+            // Check if Happy mood AND already completed today
+            if (moodIndex == 1 && db.hasCompletedHappyQuestsToday()) {
+                showEmptyState("You're happy! No more tasks needed today! \n\nEnjoy your day!");
                 return;
             }
 
-        }
+            List<Quest> updatedQuests = db.getQuestsForMood(moodIndex);
 
-        questsAdapter.notifyItemChanged(position);
-        updateCoinDisplay();
+            if (updatedQuests.isEmpty()) {
+                showEmptyState("No quests available for your mood today!");
+            } else {
+                // Hide empty state and show quest list
+                if (emptyStateMessage != null) {
+                    emptyStateMessage.setVisibility(View.GONE);
+                }
+                questsRecyclerView.setVisibility(View.VISIBLE);
+
+                if (questsAdapter != null) {
+                    questsAdapter.updateQuests(updatedQuests);
+                }
+            }
+        }
     }
 
     // ================= NAVIGATION =================
     private void setupNavigation() {
-
         if (settingsIcon != null) {
             settingsIcon.setOnClickListener(v -> {
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -134,14 +159,16 @@ public class QuestsActivity extends BaseActivity {
 
         if (navHome != null) {
             navHome.setOnClickListener(v -> {
-                startActivity(new Intent(this, MoodResultActivity.class));
+                Intent intent = new Intent(this, MoodResultActivity.class);
+                intent.putExtra("selected_mood", moodIndex);
+                startActivity(intent);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
         if (navQuests != null) {
             navQuests.setOnClickListener(v -> {
-                // Current screen → do nothing
+                // Current screen - do nothing
             });
         }
 
@@ -156,11 +183,15 @@ public class QuestsActivity extends BaseActivity {
     // ================= COINS =================
     private void updateCoinDisplay() {
         android.widget.TextView coinAmount = findViewById(R.id.coinAmount);
+        if (coinAmount != null) {
+            try {
+                int coins = db.getCoins();
+                coinAmount.setText(String.valueOf(coins));
+            } catch (Exception e) {
+                coinAmount.setText("0");
+            }
 
-        if (coinAmount != null && db != null) {
-            coinAmount.setText(String.valueOf(db.getCoins()));
-
-            // DEV shortcut
+            // DEV cheat mode
             coinAmount.setOnLongClickListener(v -> {
                 db.addCoins(100);
                 updateCoinDisplay();

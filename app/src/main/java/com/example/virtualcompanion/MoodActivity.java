@@ -2,10 +2,9 @@ package com.example.virtualcompanion;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 
@@ -15,7 +14,7 @@ public class MoodActivity extends BaseActivity {
     private int selectedMoodIndex = -1;
     private ImageView mainPetImage;
 
-    // Pet image resources based on gender and mood
+    // Pet image resources based on gender and mood (UPDATED from co-worker)
     private static final int[] MALE_PET_EMOTIONS = {
             R.drawable.emotion_neutral,
             R.drawable.emotion_happy,
@@ -97,16 +96,17 @@ public class MoodActivity extends BaseActivity {
         setupEmojiListeners(emoji4, 3);
         setupEmojiListeners(emoji5, 4);
 
-        // Mood message prompt
+        // Get the flow to determine context
         String flow = getIntent().getStringExtra("flow");
 
+        // Mood message prompt
         if ("QUEST_COMPLETE".equals(flow)) {
-
             if (moodInfoMessage != null) {
-                moodInfoMessage.setVisibility(android.view.View.VISIBLE);
+                moodInfoMessage.setVisibility(View.VISIBLE);
+                moodInfoMessage.setText("You completed all your tasks! How do you feel now?");
             }
             if (moodPrompt != null) {
-                moodPrompt.setVisibility(android.view.View.GONE);
+                moodPrompt.setVisibility(View.GONE);
             }
         }
 
@@ -137,19 +137,22 @@ public class MoodActivity extends BaseActivity {
             finish(); // Finish this activity so they can't go back to selection today
         });
 
-
-        // Settings → Settings
+        // Settings → Settings (HIDE when coming from quest completion)
         if (settingsIcon != null) {
-            settingsIcon.setOnClickListener(v -> {
-
-                Intent intent = new Intent(
-                        MoodActivity.this,
-                        SettingsActivity.class
-                );
-
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            });
+            if ("QUEST_COMPLETE".equals(flow)) {
+                // Hide settings button after completing all quests
+                settingsIcon.setVisibility(View.GONE);
+            } else {
+                // Normal flow - settings button visible
+                settingsIcon.setOnClickListener(v -> {
+                    Intent intent = new Intent(
+                            MoodActivity.this,
+                            SettingsActivity.class
+                    );
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                });
+            }
         }
 
         // Home - DISABLED with message

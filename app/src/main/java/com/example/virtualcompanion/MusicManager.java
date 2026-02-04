@@ -6,7 +6,6 @@ import android.media.MediaPlayer;
 public class MusicManager {
 
     private static MediaPlayer mediaPlayer;
-
     private static boolean isMusicEnabled = true;
     private static boolean isInitialized = false;
 
@@ -58,13 +57,25 @@ public class MusicManager {
         } catch (Exception ignored) {}
     }
 
-    // Stop fully (only when app exits)
+    // Resume
+    public static synchronized void resumeMusic() {
+        try {
+            if (mediaPlayer != null && !mediaPlayer.isPlaying() && isMusicEnabled) {
+                mediaPlayer.start();
+            }
+        } catch (Exception ignored) {}
+    }
+
+    // Stop fully (when app exits or goes to background)
     public static synchronized void stopMusic() {
 
         try {
 
             if (mediaPlayer != null) {
 
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
                 mediaPlayer.release();
                 mediaPlayer = null;
                 isInitialized = false;
@@ -80,10 +91,17 @@ public class MusicManager {
 
         if (!enabled) {
             pauseMusic();
+        } else {
+            resumeMusic();
         }
     }
 
     public static boolean isMusicEnabled() {
         return isMusicEnabled;
+    }
+
+    // Check if playing
+    public static boolean isPlaying() {
+        return mediaPlayer != null && mediaPlayer.isPlaying();
     }
 }

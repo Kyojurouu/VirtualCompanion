@@ -216,19 +216,19 @@
             android:visibility="gone" />
 
         <ImageView
-            android:id="@+id/hatLayer"
+            android:id="@+id/glassesLayer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="Hat"
+            android:contentDescription="Glasses"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
             android:visibility="gone" />
 
         <ImageView
-            android:id="@+id/glassesLayer"
+            android:id="@+id/hatLayer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="Glasses"
+            android:contentDescription="Hat"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
             android:visibility="gone" />

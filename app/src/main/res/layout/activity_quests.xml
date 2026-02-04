@@ -146,6 +146,26 @@
             app:autoSizeMaxTextSize="20sp"
             app:autoSizeStepGranularity="1sp" />
 
+        <!-- Empty State Message - ADDED -->
+        <TextView
+            android:id="@+id/emptyStateMessage"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="No quests available"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:fontFamily="@font/nunito_bold"
+            android:lineSpacingExtra="4dp"
+            android:textAlignment="center"
+            android:shadowColor="#DD000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="6"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
         <!-- Quests List -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/questsRecyclerView"

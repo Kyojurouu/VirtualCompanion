@@ -21,7 +21,7 @@ public class CustomGlassesActivity extends BaseActivity {
     // Selected preview
     private int selectedPreview = 0;
     private int selectedPrice = 0;
-
+    private int moodIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +29,11 @@ public class CustomGlassesActivity extends BaseActivity {
 
         setContentView(R.layout.activity_custom_glasses);
 
+        moodIndex = getIntent().getIntExtra("selected_mood", -1);
+
+        if (moodIndex == -1) {
+            moodIndex = DatabaseManager.get(this).getLatestMood();
+        }
 
         // ================= LAYERS =================
 
@@ -45,11 +50,23 @@ public class CustomGlassesActivity extends BaseActivity {
 
         String gender = DatabaseManager.get(this).getGender();
 
-        if ("female".equalsIgnoreCase(gender)) {
-            petDisplay.setImageResource(R.drawable.emotion_neutral_g);
-        } else {
-            petDisplay.setImageResource(R.drawable.emotion_neutral);
+        int[] petEmotions = "female".equalsIgnoreCase(gender)
+                ? new int[]{
+                R.drawable.emote_neutral_g_moodresult,
+                R.drawable.emote_happy_g_moodresult,
+                R.drawable.emote_sad_g_moodresult,
+                R.drawable.emote_angry_g_moodresult,
+                R.drawable.emote_anxious_g_moodresult
         }
+                : new int[]{
+                R.drawable.emote_neutral_b_moodresult,
+                R.drawable.emote_happy_b_moodresult,
+                R.drawable.emote_sad_b_moodresult,
+                R.drawable.emote_angry_b_moodresult,
+                R.drawable.emote_anxious_b_moodresult
+        };
+
+        petDisplay.setImageResource(petEmotions[moodIndex]);
 
         // ================= RECYCLER =================
 
@@ -150,7 +167,7 @@ public class CustomGlassesActivity extends BaseActivity {
                 // PURCHASE
                 try {
                     int coins = DatabaseManager.get(this).getCoins();
-                    
+
                     if (coins >= selectedPrice) {
                         DatabaseManager.get(this).addCoins(-selectedPrice);
                         InventoryManager.addItem(this, selectedPreview);
@@ -240,7 +257,7 @@ public class CustomGlassesActivity extends BaseActivity {
 
     private void updateEquipText() {
         if (equipButton == null) return;
-        
+
         int equipped = OutfitManager.getGlasses(this);
 
         // Check if item is owned
@@ -265,7 +282,7 @@ public class CustomGlassesActivity extends BaseActivity {
             } catch (Exception e) {
                 coinDisplay.setText("150");
             }
-            
+
             // CHEAT MODE: Long press to add 100 coins
             coinDisplay.setOnLongClickListener(v -> {
                 DatabaseManager.get(this).addCoins(100);
@@ -289,28 +306,28 @@ public class CustomGlassesActivity extends BaseActivity {
 
         if (cat1 != null) {
             cat1.setOnClickListener(v -> {
-                    startActivity(new Intent(
-                            this,
-                            CustomTopActivity.class));
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                Intent intent = new Intent(this, CustomTopActivity.class);
+                intent.putExtra("selected_mood", moodIndex);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
         if (cat2 != null) {
             cat2.setOnClickListener(v -> {
-                    startActivity(new Intent(
-                            this,
-                            CustomBottomActivity.class));
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                Intent intent = new Intent(this, CustomBottomActivity.class);
+                intent.putExtra("selected_mood", moodIndex);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
         if (cat3 != null) {
             cat3.setOnClickListener(v -> {
-                    startActivity(new Intent(
-                            this,
-                            CustomHatActivity.class));
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                Intent intent = new Intent(this, CustomHatActivity.class);
+                intent.putExtra("selected_mood", moodIndex);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
     }
@@ -325,10 +342,10 @@ public class CustomGlassesActivity extends BaseActivity {
 
         if (settings != null) {
             settings.setOnClickListener(v -> {
-                    startActivity(new Intent(
-                            this,
-                            SettingsActivity.class));
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                startActivity(new Intent(
+                        this,
+                        SettingsActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
     }
@@ -344,19 +361,19 @@ public class CustomGlassesActivity extends BaseActivity {
 
         if (navHome != null) {
             navHome.setOnClickListener(v -> {
-                    startActivity(new Intent(
-                            this,
-                            MoodResultActivity.class));
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                Intent intent = new Intent(this, MoodResultActivity.class);
+                intent.putExtra("selected_mood", moodIndex);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
         if (navQuests != null) {
             navQuests.setOnClickListener(v -> {
-                    startActivity(new Intent(
-                            this,
-                            QuestsActivity.class));
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                Intent intent = new Intent(this, QuestsActivity.class);
+                intent.putExtra("selected_mood", moodIndex);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
     }
