@@ -11,12 +11,11 @@ public class NavigationHelper {
     public static void setActive(Context context, ImageView icon) {
         if (icon == null) return;
 
-        // Gold color
+
         icon.setColorFilter(context.getResources().getColor(R.color.nav_active));
 
-        // Scale up 30%
-        icon.setScaleX(1.3f);
-        icon.setScaleY(1.3f);
+        icon.setScaleX(1.31f);
+        icon.setScaleY(1.31f);
 
         // Full brightness
         icon.setAlpha(1.0f);
