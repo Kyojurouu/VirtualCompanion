@@ -14,11 +14,11 @@ public class MoodResultActivity extends BaseActivity {
     };
 
     private static final String[] MOOD_MESSAGES = {
-            "You’re doing your best, and that’s enough!",
+            "You're doing your best, and that's enough!",
             "Happiness looks good on you. Keep it!",
-            "It’s okay to feel low. You're not alone.",
-            "Your feelings are loud, but you’re stronger.",
-            "Breathe. You’re safe. You’ve got this."
+            "It's okay to feel low. You're not alone.",
+            "Your feelings are loud, but you're stronger.",
+            "Breathe. You're safe. You've got this."
     };
 
     @Override
@@ -156,6 +156,11 @@ public class MoodResultActivity extends BaseActivity {
         ImageView navTasks = findViewById(R.id.navQuests);
         ImageView navCustomize = findViewById(R.id.navCustomize);
 
+        // ================= SETUP BOTTOM NAV WITH HIGHLIGHT =================
+        NavigationHelper.setInactive(this, navTasks);
+        NavigationHelper.setInactive(this, navCustomize);
+        NavigationHelper.setActive(this, navHome);  // Highlight HOME
+
         // Settings → SettingsActivity
         if (settingsIcon != null) {
             settingsIcon.setOnClickListener(v -> {
@@ -171,19 +176,12 @@ public class MoodResultActivity extends BaseActivity {
         // Home to MoodResultActivity
         if (navHome != null) {
             navHome.setOnClickListener(v -> {
-                Intent intent = new Intent(
-                        MoodResultActivity.this,
-                        MoodResultActivity.class
-                );
-                intent.putExtra("selected_mood", finalMoodIndex);
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                // Already on home - do nothing
             });
         }
 
         // ================= QUESTS BUTTON - ALWAYS ENABLED =================
         if (navTasks != null) {
-            navTasks.setAlpha(1.0f); // Always visible
             navTasks.setOnClickListener(v -> {
                 Intent intent = new Intent(
                         MoodResultActivity.this,

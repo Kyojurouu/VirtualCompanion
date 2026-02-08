@@ -88,7 +88,7 @@ public class QuestsActivity extends BaseActivity {
         // Check if Happy mood AND first quest already completed today
         if (moodIndex == 1 && db.hasCompletedFirstQuestToday()) {
             // Show empty state for Happy mood (after first quest completion today)
-            showEmptyState("You’re all done for today! Keep this happiness close!");
+            showEmptyState("You're all done for today! Keep this happiness close!");
             return;
         }
 
@@ -151,6 +151,11 @@ public class QuestsActivity extends BaseActivity {
 
     // ================= NAVIGATION =================
     private void setupNavigation() {
+        // ================= SETUP BOTTOM NAV WITH HIGHLIGHT =================
+        NavigationHelper.setInactive(this, navHome);
+        NavigationHelper.setInactive(this, navCustomize);
+        NavigationHelper.setActive(this, navQuests);  // Highlight QUESTS
+
         if (settingsIcon != null) {
             settingsIcon.setOnClickListener(v -> {
                 startActivity(new Intent(this, SettingsActivity.class));

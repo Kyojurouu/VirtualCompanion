@@ -264,6 +264,11 @@ public class SettingsActivity extends BaseActivity {
         ImageView navQuests = findViewById(R.id.navQuests);
         ImageView navCustomize = findViewById(R.id.navCustomize);
 
+        // ================= SETUP BOTTOM NAV (ALL INACTIVE IN SETTINGS) =================
+        NavigationHelper.setInactive(this, navHome);
+        NavigationHelper.setInactive(this, navQuests);
+        NavigationHelper.setInactive(this, navCustomize);
+
         if (navHome != null) {
             navHome.setOnClickListener(v -> {
                 startActivity(new Intent(

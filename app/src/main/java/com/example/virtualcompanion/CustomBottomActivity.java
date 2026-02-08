@@ -435,6 +435,12 @@ public class CustomBottomActivity extends BaseActivity {
         ImageView q = findViewById(R.id.navQuests);
         ImageView c = findViewById(R.id.navCustomize);
 
+// Set inactive state for non-current screens
+        NavigationHelper.setInactive(this, h);
+        NavigationHelper.setInactive(this, q);
+
+// Highlight current screen (CUSTOMIZE)
+        NavigationHelper.setActive(this, c);
 
         if (h != null) {
             h.setOnClickListener(v -> {
@@ -456,10 +462,7 @@ public class CustomBottomActivity extends BaseActivity {
 
         if (c != null) {
             c.setOnClickListener(v -> {
-                Intent intent = new Intent(this, CustomTopActivity.class);
-                intent.putExtra("selected_mood", moodIndex);
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                // Already on customize - do nothing
             });
         }
     }

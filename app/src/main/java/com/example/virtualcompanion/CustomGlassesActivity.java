@@ -445,12 +445,19 @@ public class CustomGlassesActivity extends BaseActivity {
 
 
     // ================= BOTTOM NAV =================
+// ================= BOTTOM NAV =================
 
     private void setupBottomNav() {
-
         ImageView navHome = findViewById(R.id.navHome);
         ImageView navQuests = findViewById(R.id.navQuests);
+        ImageView navCustomize = findViewById(R.id.navCustomize);
 
+        // Set inactive state for non-current screens
+        NavigationHelper.setInactive(this, navHome);
+        NavigationHelper.setInactive(this, navQuests);
+
+        // Highlight current screen (CUSTOMIZE)
+        NavigationHelper.setActive(this, navCustomize);
 
         if (navHome != null) {
             navHome.setOnClickListener(v -> {
@@ -467,6 +474,12 @@ public class CustomGlassesActivity extends BaseActivity {
                 intent.putExtra("selected_mood", moodIndex);
                 startActivity(intent);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            });
+        }
+
+        if (navCustomize != null) {
+            navCustomize.setOnClickListener(v -> {
+                // Already on customize - do nothing
             });
         }
     }
