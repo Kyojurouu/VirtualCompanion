@@ -47,21 +47,24 @@ public class ShopItemAdapter extends RecyclerView.Adapter<ShopItemAdapter.ItemVi
         holder.itemImage.setImageResource(shopImages[position]);
 
         // Show price or hide container
+        // Use INVISIBLE (not GONE) so all items keep the same height,
+        // ensuring the RecyclerView measures tall enough for price tags
+        // on every device regardless of which items are visible first.
         String price = prices[position].trim();
         
         if (price.isEmpty() || price.equals("0")) {
-            // Free items - smaller card (no price space)
-            holder.priceContainer.setVisibility(View.GONE);
+            // Free items - keep space but hide price
+            holder.priceContainer.setVisibility(View.INVISIBLE);
         } else {
             // Paid items - check if owned
             boolean isOwned = (equipImages[position] != 0) && 
                             InventoryManager.isOwned(holder.itemView.getContext(), equipImages[position]);
             
             if (isOwned) {
-                // Already owned - smaller card (no price space)
-                holder.priceContainer.setVisibility(View.GONE);
+                // Already owned - hide price
+                holder.priceContainer.setVisibility(View.INVISIBLE);
             } else {
-                // Not owned - show price (taller card)
+                // Not owned - show price
                 holder.priceContainer.setVisibility(View.VISIBLE);
                 holder.itemPrice.setText(prices[position]);
             }
